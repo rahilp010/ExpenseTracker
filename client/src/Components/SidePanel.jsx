@@ -4,23 +4,36 @@ import {
    ChartSpline,
    ClockFading,
    ChevronLeft,
-   Activity,
    UserRoundPen,
 } from 'lucide-react';
-import { GiRadarSweep  } from 'react-icons/gi';
+import { GiRadarSweep } from 'react-icons/gi';
+import { NavLink, useLocation } from 'react-router';
 
 const SidePanel = () => {
-   const [active, setActive] = useState('Dashboard');
+   const location = useLocation();
    const [isOpen, setIsOpen] = useState(true);
 
    const navItems = [
       {
          name: 'Dashboard',
          icon: <LayoutPanelLeft size={20} strokeWidth={2} />,
+         path: '/',
       },
-      { name: 'Reports', icon: <ChartSpline size={20} strokeWidth={2} /> },
-      { name: 'History', icon: <ClockFading size={20} strokeWidth={2} /> },
-      { name: 'Profile', icon: <UserRoundPen size={20} strokeWidth={2} /> },
+      {
+         name: 'Report',
+         icon: <ChartSpline size={20} strokeWidth={2} />,
+         path: '/report',
+      },
+      {
+         name: 'History',
+         icon: <ClockFading size={20} strokeWidth={2} />,
+         path: '/history',
+      },
+      {
+         name: 'Profile',
+         icon: <UserRoundPen size={20} strokeWidth={2} />,
+         path: '/settings',
+      },
    ];
 
    return (
@@ -34,30 +47,38 @@ const SidePanel = () => {
             }`}
             onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? (
-               <div className='flex justify-between items-center gap-3 my-3 ml-3'>
-                  <GiRadarSweep className="h-10 text-yellow-400 -ml-2" size={35} />
+               <div className="flex justify-between items-center gap-3 my-3 ml-3">
+                  <GiRadarSweep
+                     className="h-10 text-yellow-400 -ml-2"
+                     size={35}
+                  />
                </div>
             ) : (
-               <div className='flex justify-between items-center gap-3'>
-                  <div className={`text-2xl font-bold tracking-wider px-2 my-3 text-yellow-400`}>Tracksy</div>
+               <div className="flex justify-between items-center gap-3">
+                  <div
+                     className={`text-2xl font-bold tracking-wider px-2 my-3 text-yellow-400`}>
+                     Tracksy
+                  </div>
                   <ChevronLeft className="h-10 text-gray-600" size={25} />
                </div>
             )}
          </div>
 
          {navItems.map((item) => (
-            <div
+            <NavLink
                key={item.name}
-               onClick={() => setActive(item.name)}
+               to={item.path}
                className={`flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer transition-all duration-200
           ${
-             active === item.name
+             location.pathname === item.path
                 ? 'bg-[#d4d9fb] text-blue-700 font-medium border]'
                 : 'text-gray-500 hover:bg-[#d4d9fb]'
           }`}>
                <div className="text-blue-600">{item.icon}</div>
-               {!isOpen && <span className="text-[16px] font-medium">{item.name}</span>}
-            </div>
+               {!isOpen && (
+                  <span className="text-[16px] font-medium">{item.name}</span>
+               )}
+            </NavLink>
          ))}
       </div>
    );

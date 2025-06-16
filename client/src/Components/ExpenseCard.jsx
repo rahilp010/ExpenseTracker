@@ -1,14 +1,16 @@
 import { Doughnut } from 'react-chartjs-2';
 import {
-   ArrowBigLeft,
-   ArrowBigRight,
    EllipsisVertical,
    MoveLeft,
    MoveRight,
+   Pencil,
+   PenLine,
 } from 'lucide-react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { useState } from 'react';
-import { monthlyExpenses } from '../data';
+import { useDispatch, useSelector } from 'react-redux';
+import savedMoney from '../assets/savedMoney.webp';
+import line from '../assets/Line.png';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -40,6 +42,14 @@ const centerTextPlugin = {
 
 const ExpenseChartCard = () => {
    const [currentIndex, setCurrentIndex] = useState(new Date().getMonth());
+   const dispatch = useDispatch();
+   const addExpenseData = useSelector(
+      (state) => state.expense.addExpense.expenseData
+   );
+   const [updateModal, setUpdateModal] = useState(false);
+   const [updateExpense, setUpdateExpense] = useState(null);
+
+   console.log('addExpenseData', addExpenseData);
 
    const months = [
       'January',
@@ -60,12 +70,6 @@ const ExpenseChartCard = () => {
    const realCurrentMonthIndex = new Date().getMonth(); // e.g. June = 5
    console.log('currentMonth', currentMonth);
 
-   const expensesPerMonth = monthlyExpenses[currentIndex] || [];
-   const totalExpense = expensesPerMonth.reduce(
-      (acc, curr) => acc + curr.value,
-      0
-   );
-
    const handleNext = () => {
       if (currentIndex < realCurrentMonthIndex) {
          setCurrentIndex((prevIndex) => prevIndex + 1);
@@ -73,22 +77,51 @@ const ExpenseChartCard = () => {
    };
 
    const handlePrev = () => {
-      setCurrentIndex((prevIndex) =>
-         prevIndex === 0 ? months.length - 1 : prevIndex - 1
-      );
+      if (currentIndex > 0) {
+         setCurrentIndex((prevIndex) => prevIndex - 1);
+      }
    };
+
+   const getMonthIndex = (dateString) => {
+      const month = parseInt(dateString.split('-')[1], 10); // "06" -> 6
+      return month - 1; // convert to 0-based index
+   };
+
+   const monthWiseExpense = addExpenseData.filter((e) => {
+      const expenseMonthIndex = getMonthIndex(e.date);
+      return expenseMonthIndex === currentIndex;
+   });
+
+   const groupedExpense = {};
+
+   monthWiseExpense.forEach((item) => {
+      if (!groupedExpense[item.category]) {
+         groupedExpense[item.category] = {
+            name: item.category,
+            color: item.color,
+            value: 0,
+         };
+      }
+      groupedExpense[item.category].value += parseFloat(item.price);
+   });
+
+   const categoryWiseData = Object.values(groupedExpense);
+
+   const totalExpense = categoryWiseData.reduce(
+      (sum, item) => sum + item.value,
+      0
+   );
 
    const chartData = {
       datasets: [
          {
-            data: expensesPerMonth.map((e) => e.value),
-            backgroundColor: expensesPerMonth.map((e) => e.color),
+            data: categoryWiseData.map((e) => e.value),
+            backgroundColor: categoryWiseData.map((e) => e.color),
             cutout: '70%',
             borderRadius: 6,
          },
       ],
    };
-
    const chartOptions = (total) => ({
       responsive: true,
       maintainAspectRatio: false,
@@ -103,31 +136,44 @@ const ExpenseChartCard = () => {
    });
 
    return (
-      <>
-         <div className="bg-white p-6 rounded-2xl shadow-md w-full relative overflow-hidden">
-            <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-col gap-4 h-full relative">
+         <div className="bg-white border-2 border-gray-200 p-6 rounded-2xl shadow-lg w-full h-[calc(2/3*100%)-100px] relative overflow-hidden">
+            <div className="flex justify-between relative items-center mb-4">
                <p className="text-lg font-semibold text-gray-800">
-                  {currentMonth} Expense
+                  {currentMonth} Expenses
                </p>
-               <EllipsisVertical className="text-gray-500" size={20} />
+               <EllipsisVertical
+                  className="text-gray-500 cursor-pointer"
+                  size={20}
+                  onClick={() => setUpdateExpense(true)}
+               />
+               {updateExpense && (
+                  <div
+                     className="absolute top-6 rounded-lg right-0 w-1/5 h-full z-10 bg-white/50 hover:bg-[#eabde6]/50 cursor-pointer "
+                     onClick={() => setUpdateExpense(false)}>
+                     <div className="p-1 flex items-center gap-2 justify-center border-2 border-[#eabde6] rounded-xl">
+                        <PenLine size={15} />
+                        <p className="text-sm font-light">Update</p>
+                     </div>
+                  </div>
+               )}
             </div>
 
-            {/* Chart */}
-            <div className="h-40 mb-4">
+            <div className="h-45 mb-6">
                <Doughnut
                   data={chartData}
                   options={chartOptions(totalExpense)}
                   plugins={[centerTextPlugin]}
-                  className='drop-shadow-lg'
+                  className="drop-shadow-lg"
                />
             </div>
 
-            {/* Expense List */}
             <div
-               className={`grid grid-cols-${
-                  expensesPerMonth.filter((item) => item.value > 0).length
-               } text-sm mt-4 gap-3 rounded-2xl`}>
-               {expensesPerMonth
+               style={{
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+               }}
+               className={`grid text-sm mt-4 gap-3 rounded-2xl`}>
+               {categoryWiseData
                   .filter((item) => item.value > 0)
                   .map((item, index) => (
                      <div
@@ -143,14 +189,50 @@ const ExpenseChartCard = () => {
                      </div>
                   ))}
             </div>
-            <div className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-blue-300 p-2 rounded-full shadow cursor-pointer">
-               <MoveLeft onClick={handlePrev} />
+            <div
+               onClick={handlePrev}
+               className={`absolute top-1/2 left-1 transform -translate-y-1/2 p-2 rounded-full shadow ${
+                  currentIndex === 0
+                     ? 'bg-gray-300 cursor-not-allowed'
+                     : 'bg-blue-300 cursor-pointer'
+               }`}>
+               <MoveLeft />
             </div>
-            <div className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-blue-300 p-2 rounded-full shadow cursor-pointer">
-               <MoveRight onClick={handleNext} />
+            <div
+               onClick={handleNext}
+               className={`absolute top-1/2 right-1 transform -translate-y-1/2 p-2 rounded-full shadow ${
+                  currentIndex === realCurrentMonthIndex
+                     ? 'bg-gray-300 cursor-not-allowed'
+                     : 'bg-blue-300 cursor-pointer'
+               }`}>
+               <MoveRight />
             </div>
          </div>
-      </>
+         <div className="bg-white border-2 border-gray-200 p-6 rounded-2xl shadow-lg w-full h-[calc(1/3*106%)] relative overflow-hidden grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2">
+               <p className="text-lg font-semibold text-gray-800">
+                  Saved Money
+               </p>
+               <div className="relative w-fit my-5 z-10 bg-white ml-2 drop-shadow-lg rounded-full">
+                  <p className="text-2xl font-bold text-gray-800 border-3 border-red-400 p-10 w-fit rounded-full"></p>
+                  <p className="absolute top-1/2 left-1/2 text-2xl -translate-x-1/2 -translate-y-1/2 font-bold text-gray-800">
+                     3000
+                  </p>
+               </div>
+               <p className="border-t-4 border-gray-200 absolute top-1/2 left-0  mt-2 w-full"></p>
+               <p className="text-red-500 text-xl font-thin absolute top-1/2 left-32 tracking-widest drop-shadow-2xl mt-1 w-full">
+                  Last Month
+               </p>
+               <p className="border-t-4 border-gray-200 absolute top-1/2 left-0  mt-6 w-full"></p>
+            </div>
+            <img
+               src={savedMoney}
+               alt=""
+               srcset=""
+               className="w-96 h-40 object-cover drop-shadow-xl"
+            />
+         </div>
+      </div>
    );
 };
 

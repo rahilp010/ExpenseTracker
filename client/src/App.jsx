@@ -1,38 +1,26 @@
 import { Route, Routes } from 'react-router';
 import Dashboard from './Screens/Dashboard.jsx';
-import Transactions from './Screens/Transactions.jsx';
-import Wallet from './Screens/Wallet.jsx';
 import Settings from './Screens/Settings.jsx';
 import notFound from './assets/404.png';
-import ProtectedRoute from './Components/ProtectedRoute.jsx';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Report from './Screens/Report.jsx';
+import History from './Screens/History.jsx';
 
 const App = () => {
    const paths = [
-      // { path: '/', element: <Credentials />, isProtected: false },
-      // { path: '/signup', element: <Credentials />, isProtected: false },
-      // { path: '/reset-password', element: <Credentials />, isProtected: false },
-      { path: '/', element: <Dashboard />, isProtected: true },
-      { path: '/transactions', element: <Transactions />, isProtected: true },
-      { path: '/wallet', element: <Wallet />, isProtected: true },
-      { path: '/settings', element: <Settings />, isProtected: true },
+      { path: '/', element: <Dashboard /> },
+      { path: '/history', element: <History /> },
+      { path: '/settings', element: <Settings /> },
+      { path: '/report', element: <Report /> },
    ];
 
    return (
-      <div className='m-4'>
+      <div className="m-4">
+         <ToastContainer />
          <Routes>
-            {paths.map(({ path, element, isProtected }) => (
-               <Route
-                  key={path}
-                  path={path}
-                  element={
-                     isProtected ? (
-                        <ProtectedRoute>{element}</ProtectedRoute>
-                     ) : (
-                        element
-                     )
-                  }
-               />
+            {paths.map(({ path, element }) => (
+               <Route key={path} path={path} element={element} />
             ))}
             <Route path="*" element={<NotFound />} />
          </Routes>
