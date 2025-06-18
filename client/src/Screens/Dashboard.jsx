@@ -43,8 +43,6 @@ const Dashboard = () => {
    const balance = useSelector((state) => state.expense.addExpense.balance);
    const totalExpense = useSelector(selectTotalExpense);
 
-   console.log('addExpenseData', addExpenseData);
-
    const [showModal, setShowModal] = useState(false);
    const [isEditingBalance, setIsEditingBalance] = useState(false);
    const [balanceInput, setBalanceInput] = useState(balance || 0);
@@ -184,7 +182,8 @@ const Dashboard = () => {
                                  className={`inline-block w-4 h-2 rounded-full `}
                               />
                               <span className="text-lg font-medium text-gray-800">
-                                 {isEditingBalance && item.title === 'Balance' ? (
+                                 {isEditingBalance &&
+                                 item.title === 'Balance' ? (
                                     <div className="flex items-center gap-2">
                                        <input
                                           type="number"
@@ -202,7 +201,9 @@ const Dashboard = () => {
                                        <CircleX
                                           size={20}
                                           className="cursor-pointer text-red-500 hover:text-red-500/70"
-                                          onClick={() => setIsEditingBalance(false)}
+                                          onClick={() =>
+                                             setIsEditingBalance(false)
+                                          }
                                        />
                                     </div>
                                  ) : (

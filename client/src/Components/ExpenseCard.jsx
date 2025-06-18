@@ -11,6 +11,8 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import savedMoney from '../assets/savedMoney.webp';
 import line from '../assets/Line.png';
+import Model from './Model';
+import { setIsUpdateExpense } from '../app/features/expenseSlice';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -46,10 +48,10 @@ const ExpenseChartCard = () => {
    const addExpenseData = useSelector(
       (state) => state.expense.addExpense.expenseData
    );
-   const [updateModal, setUpdateModal] = useState(false);
-   const [updateExpense, setUpdateExpense] = useState(null);
-
-   console.log('addExpenseData', addExpenseData);
+   const isUpdateExpense = useSelector(
+      (state) => state.expense.addExpense.isUpdateExpense
+   );
+   const [updateExpense, setUpdateExpense] = useState(false);
 
    const months = [
       'January',
@@ -150,12 +152,24 @@ const ExpenseChartCard = () => {
                {updateExpense && (
                   <div
                      className="absolute top-6 rounded-lg right-0 w-1/5 h-full z-10 bg-white/50 hover:bg-[#eabde6]/50 cursor-pointer "
-                     onClick={() => setUpdateExpense(false)}>
+                     onClick={() => {
+                        dispatch(setIsUpdateExpense(true));
+                        setUpdateExpense(false);
+                     }}>
                      <div className="p-1 flex items-center gap-2 justify-center border-2 border-[#eabde6] rounded-xl">
                         <PenLine size={15} />
-                        <p className="text-sm font-light">Update</p>
+                        <p className="text-sm font-light tracking-widest">
+                           Update
+                        </p>
                      </div>
                   </div>
+               )}
+               {isUpdateExpense && (
+                  <Model
+                     setShowModal={setUpdateExpense}
+                     setIsUpdateExpense={setIsUpdateExpense}
+                     currentMonth={currentMonth}
+                  />
                )}
             </div>
 
