@@ -7,12 +7,15 @@ import {
    PenLine,
 } from 'lucide-react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import savedMoney from '../assets/savedMoney.webp';
-import line from '../assets/Line.png';
 import Model from './Model';
-import { setIsUpdateExpense } from '../app/features/expenseSlice';
+import {
+   selectMonthlyBalance,
+   setIsUpdateExpense,
+} from '../app/features/expenseSlice';
+import { months } from '../data';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -53,24 +56,9 @@ const ExpenseChartCard = () => {
    );
    const [updateExpense, setUpdateExpense] = useState(false);
 
-   const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-   ];
-
    const currentMonth = months[currentIndex];
-   const realCurrentMonthIndex = new Date().getMonth(); // e.g. June = 5
-   console.log('currentMonth', currentMonth);
+   const lastMonth = months[currentIndex - 1];
+   const realCurrentMonthIndex = new Date().getMonth();
 
    const handleNext = () => {
       if (currentIndex < realCurrentMonthIndex) {
@@ -89,25 +77,43 @@ const ExpenseChartCard = () => {
       return month - 1; // convert to 0-based index
    };
 
-   const monthWiseExpense = addExpenseData.filter((e) => {
-      const expenseMonthIndex = getMonthIndex(e.date);
-      return expenseMonthIndex === currentIndex;
-   });
+   const lastMonthBalance = useSelector((state) =>
+      selectMonthlyBalance(state, lastMonth)
+   );
 
-   const groupedExpense = {};
+   const categoryWiseData = useMemo(() => {
+      const monthWiseExpense = addExpenseData.filter((e) => {
+         const expenseMonthIndex = getMonthIndex(e.date);
+         return expenseMonthIndex === currentIndex;
+      });
 
-   monthWiseExpense.forEach((item) => {
-      if (!groupedExpense[item.category]) {
-         groupedExpense[item.category] = {
-            name: item.category,
-            color: item.color,
-            value: 0,
-         };
-      }
-      groupedExpense[item.category].value += parseFloat(item.price);
-   });
+      const groupedExpense = {};
 
-   const categoryWiseData = Object.values(groupedExpense);
+      monthWiseExpense.forEach((item) => {
+         if (!groupedExpense[item.category]) {
+            groupedExpense[item.category] = {
+               name: item.category,
+               color: item.color,
+               value: 0,
+            };
+         }
+         groupedExpense[item.category].value += parseFloat(item.price);
+      });
+
+      return Object.values(groupedExpense);
+   }, [addExpenseData, currentIndex]);
+
+   const lastMonthExpense = useMemo(() => {
+      const lastMonth = currentIndex - 1;
+      const lastMonthExpense = addExpenseData.filter((e) => {
+         const expenseMonthIndex = getMonthIndex(e.date);
+         return expenseMonthIndex === lastMonth;
+      });
+      return lastMonthExpense.reduce(
+         (sum, item) => sum + parseFloat(item.price),
+         0
+      );
+   }, [addExpenseData, currentIndex]);
 
    const totalExpense = categoryWiseData.reduce(
       (sum, item) => sum + item.value,
@@ -138,17 +144,19 @@ const ExpenseChartCard = () => {
    });
 
    return (
-      <div className="flex flex-col gap-4 h-full relative">
-         <div className="bg-white border-2 border-gray-200 p-6 rounded-2xl shadow-lg w-full h-[calc(2/3*100%)-100px] relative overflow-hidden">
+      <div className="gap-4 relative">
+         <div className="bg-white border-2 border-gray-200 p-6 rounded-2xl shadow-lg w-full relative overflow-hidden">
             <div className="flex justify-between relative items-center mb-4">
                <p className="text-lg font-semibold text-gray-800">
                   {currentMonth} Expenses
                </p>
-               <EllipsisVertical
-                  className="text-gray-500 cursor-pointer"
-                  size={20}
-                  onClick={() => setUpdateExpense(true)}
-               />
+               {currentIndex === realCurrentMonthIndex && (
+                  <EllipsisVertical
+                     className="text-gray-500 cursor-pointer"
+                     size={20}
+                     onClick={() => setUpdateExpense(true)}
+                  />
+               )}
                {updateExpense && (
                   <div
                      className="absolute top-6 rounded-lg right-0 w-1/5 h-full z-10 bg-white/50 hover:bg-[#eabde6]/50 cursor-pointer "
@@ -184,7 +192,7 @@ const ExpenseChartCard = () => {
 
             <div
                style={{
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(50px, 1fr))',
                }}
                className={`grid text-sm mt-4 gap-3 rounded-2xl`}>
                {categoryWiseData
@@ -222,19 +230,19 @@ const ExpenseChartCard = () => {
                <MoveRight />
             </div>
          </div>
-         <div className="bg-white border-2 border-gray-200 p-6 rounded-2xl shadow-lg w-full h-[calc(1/3*106%)] relative overflow-hidden grid grid-cols-2 gap-4">
+         <div className="bg-white border-2 border-gray-200 p-6 rounded-2xl shadow-lg w-full relative overflow-hidden grid grid-cols-2 gap-4 mt-4 h-[260px]">
             <div className="flex flex-col gap-2">
                <p className="text-lg font-semibold text-gray-800">
                   Saved Money
                </p>
                <div className="relative w-fit my-5 z-10 bg-white ml-2 drop-shadow-lg rounded-full">
-                  <p className="text-2xl font-bold text-gray-800 border-3 border-red-400 p-10 w-fit rounded-full"></p>
+                  <p className="text-2xl font-bold text-gray-800 border-4 border-red-400 p-14 w-fit rounded-full"></p>
                   <p className="absolute top-1/2 left-1/2 text-2xl -translate-x-1/2 -translate-y-1/2 font-bold text-gray-800">
-                     3000
+                     {lastMonthBalance - lastMonthExpense}
                   </p>
                </div>
-               <p className="border-t-4 border-gray-200 absolute top-1/2 left-0  mt-2 w-full"></p>
-               <p className="text-red-500 text-xl font-thin absolute top-1/2 left-32 tracking-widest drop-shadow-2xl mt-1 w-full">
+               <p className="border-t-4 border-gray-200 absolute top-1/2 left-0 w-full"></p>
+               <p className="text-red-500 text-2xl font-thin absolute top-1/2 left-42 tracking-widest drop-shadow-2xl w-full">
                   Last Month
                </p>
                <p className="border-t-4 border-gray-200 absolute top-1/2 left-0  mt-6 w-full"></p>
@@ -243,7 +251,7 @@ const ExpenseChartCard = () => {
                src={savedMoney}
                alt=""
                srcset=""
-               className="w-96 h-40 object-cover drop-shadow-xl"
+               className="w-96 h-52 object-cover drop-shadow-xl"
             />
          </div>
       </div>

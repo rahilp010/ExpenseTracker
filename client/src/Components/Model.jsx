@@ -7,19 +7,25 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
    addExpense,
    loadExpense,
-   selectTotalExpense,
    updateExpense,
    deleteExpense,
 } from '../app/features/expenseSlice';
+import { data } from 'react-router';
 
-const Model = ({ setShowModal, setIsUpdateExpense, currentMonth }) => {
-   const [category, setCategory] = useState('');
+const Model = ({
+   setShowModal,
+   setIsUpdateExpense,
+   currentMonth,
+   totalExpense,
+}) => {
    const dispatch = useDispatch();
    const addExpenseData = useSelector(
       (state) => state.expense.addExpense.expenseData
    );
 
-   const balance = useSelector((state) => state.expense.addExpense.balance);
+   const balanceByMonth = useSelector(
+      (state) => state.expense.addExpense.balanceByMonth[currentMonth]
+   );
    const isUpdateExpense = useSelector(
       (state) => state.expense.addExpense.isUpdateExpense
    );
@@ -29,10 +35,11 @@ const Model = ({ setShowModal, setIsUpdateExpense, currentMonth }) => {
    const [price, setPrice] = useState('');
    const [isLoading, setIsLoading] = useState(false);
    const addedCategory = addExpenseData.map((e) => e.category);
-   const totalExpense = useSelector(selectTotalExpense);
    const [selectedCategories, setSelectedCategories] = useState([]);
    const [categoryPrices, setCategoryPrices] = useState({});
-   const existingCategories = addExpenseData.map((e) => e.category);
+   const existingCategories = addExpenseData
+      .filter((item) => item.monthOfExpense === currentMonth)
+      .map((e) => e.category);
 
    useEffect(() => {
       dispatch(loadExpense());
@@ -69,7 +76,7 @@ const Model = ({ setShowModal, setIsUpdateExpense, currentMonth }) => {
          toast.error('Price must be greater than 0');
          setIsLoading(false);
          return;
-      } else if (parseFloat(price) > balance) {
+      } else if (parseFloat(price) > balanceByMonth) {
          toast.error('Balance is not enough');
          setIsLoading(false);
          return;
@@ -87,7 +94,8 @@ const Model = ({ setShowModal, setIsUpdateExpense, currentMonth }) => {
          color: categories.find((c) => c.name === cat).color,
          monthOfExpense: currentMonth,
          id: Date.now() + Math.random(), // ensure uniqueness
-         availableBalance: balance - parseFloat(price),
+         availableBalance:
+            parseFloat(balanceByMonth) - parseFloat(totalExpense),
       }));
 
       setTimeout(() => {
@@ -108,7 +116,7 @@ const Model = ({ setShowModal, setIsUpdateExpense, currentMonth }) => {
       //    setIsLoading(false);
       //    return;
       // } else
-      if (parseFloat(price) > balance) {
+      if (parseFloat(price) > balanceByMonth) {
          toast.error('Balance is not enough');
          setIsLoading(false);
          return;
@@ -124,26 +132,27 @@ const Model = ({ setShowModal, setIsUpdateExpense, currentMonth }) => {
             }
 
             const updatedPrice = parseFloat(categoryPrices[cat]);
-            if (!updatedPrice || updatedPrice <= 0 || updatedPrice > balance) {
+            if (
+               !updatedPrice ||
+               updatedPrice <= 0 ||
+               updatedPrice > balanceByMonth
+            ) {
                toast.error(`Invalid price for ${cat}`);
                return null;
             }
-
-            console.log('updatedPrice', updatedPrice);
 
             return {
                ...expense,
                price: updatedPrice,
                date: new Date().toISOString(),
-               availableBalance: balance - updatedPrice,
+               availableBalance:
+                  parseFloat(expense.availableBalance) - updatedPrice,
                monthOfExpense: currentMonth,
                id: expense.id,
                color: expense.color,
             };
          })
          .filter(Boolean);
-
-      console.log('updateExpenseList', updateExpenseList);
 
       if (updateExpenseList.length > 0) {
          setTimeout(() => {
@@ -186,11 +195,6 @@ const Model = ({ setShowModal, setIsUpdateExpense, currentMonth }) => {
                      className="block text-sm mb-1 text-gray-600">
                      Category
                   </label>
-                  {console.log(
-                     isUpdateExpense
-                        ? existingCategories.length
-                        : categories.length
-                  )}
                   <div
                      className={`grid text-center gap-1 mt-2`}
                      style={{

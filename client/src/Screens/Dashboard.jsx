@@ -21,9 +21,12 @@ import Model from '../Components/Model';
 import { useDispatch, useSelector } from 'react-redux';
 import {
    loadExpense,
+   selectMonthlyBalance,
    selectTotalExpense,
-   updateBalance,
+   setBalanceByMonth,
 } from '../app/features/expenseSlice';
+import Report from '../Components/Report';
+import { months } from '../data';
 
 defaults.maintainAspectRatio = false;
 defaults.responsive = true;
@@ -37,46 +40,84 @@ const dataMain = [
 const Dashboard = () => {
    const { isDarkMode } = useDarkMode();
    const dispatch = useDispatch();
+   const currentMonth = months[new Date().getMonth()];
    const addExpenseData = useSelector(
       (state) => state.expense.addExpense.expenseData
    );
-   const balance = useSelector((state) => state.expense.addExpense.balance);
+   console.log('addExpenseData', addExpenseData);
+
+   const balanceByMonth = useSelector((state) =>
+      selectMonthlyBalance(state, currentMonth)
+   );
+
    const totalExpense = useSelector(selectTotalExpense);
 
    const [showModal, setShowModal] = useState(false);
    const [isEditingBalance, setIsEditingBalance] = useState(false);
-   const [balanceInput, setBalanceInput] = useState(balance || 0);
+   const [balanceInput, setBalanceInput] = useState(balanceByMonth || 0);
 
    useEffect(() => {
       dispatch(loadExpense());
-   }, [dispatch]);
+      const storedBalances =
+         JSON.parse(localStorage.getItem('balanceByMonth')) || {};
+      if (!storedBalances[currentMonth]) {
+         dispatch(
+            setBalanceByMonth({ month: currentMonth, balanceByMonth: 20000 })
+         );
+      }
+   }, [dispatch, currentMonth]);
+
+   useEffect(() => {
+      setBalanceInput(balanceByMonth); // keeps input in sync
+   }, [balanceByMonth]);
 
    const centerTextPlugin = {
       id: 'centerText',
       beforeDraw(chart) {
          const { width, height, ctx } = chart;
          ctx.restore();
-         const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+
+         const remaining = chart.data.datasets[0].data[0];
+         const spent = chart.data.datasets[0].data[1];
+
          ctx.textAlign = 'center';
          ctx.textBaseline = 'middle';
 
-         ctx.fillStyle = '#9CA3AF'; // light gray
+         ctx.fillStyle = '#9CA3AF';
          ctx.font = `${height * 0.07}px sans-serif`;
-         ctx.fillText('Total', width / 2, height / 2.2);
+         ctx.fillText('Remaining', width / 2, height / 2.2);
 
-         ctx.fillStyle = '#111827'; // dark text
+         ctx.fillStyle = '#111827';
          ctx.font = `bold ${height * 0.08}px sans-serif`;
-         ctx.fillText(`₹${total}`, width / 2, height / 1.6);
+         ctx.fillText(`₹${remaining}`, width / 2, height / 1.6);
 
          ctx.save();
       },
    };
 
+   const currentMonthExpenses = addExpenseData.filter(
+      (item) => item.monthOfExpense === currentMonth
+   );
+
+   const validBalance =
+      typeof balanceByMonth === 'number' ? Math.abs(balanceByMonth) : 0;
+
+   
+   const validExpense = currentMonthExpenses.reduce(
+      (acc, item) => acc + Number(item.price || 0),
+      0
+   );
+
+   console.log(validExpense);
+
+
+   const remainingBalance = Math.max(validBalance - validExpense, 0);
+
    const data = {
       datasets: [
          {
             backgroundColor: ['#8896f3', '#ffc100'],
-            data: [balance, totalExpense],
+            data: [remainingBalance, validExpense],
             borderWidth: 2,
             cutout: '60%',
             borderColor: 'white',
@@ -94,7 +135,12 @@ const Dashboard = () => {
 
    const handleEditBalance = (e) => {
       if (e.key === 'Enter') {
-         dispatch(updateBalance(Number(balanceInput)));
+         dispatch(
+            setBalanceByMonth({
+               month: currentMonth,
+               balanceByMonth: parseFloat(balanceInput),
+            })
+         );
          setIsEditingBalance(false);
       }
    };
@@ -106,29 +152,18 @@ const Dashboard = () => {
             <div
                className={`flex-1 p-6 overflow-y-auto min-h-screen customScrollbar`}>
                <div className="relative flex items-center justify-end mb-3 gap-5 -mt-2">
-                  <div className="relative w-64">
-                     <input
-                        type="text"
-                        placeholder="Search..."
-                        className="w-full p-2 rounded-2xl border-2 indent-2 border-[#d4d9fb] outline-none focus:border-[#8896f3]"
+                  <div className="relative border-2 cursor-pointer text-[#8896f3] border-[#d4d9fb] rounded-full p-2 hover:bg-[#8896f3]/70 transition-all duration-300 hover:text-white">
+                     <Bell
+                        size={20}
+                        strokeWidth={2}
+                        className="hover:text-white transition-all duration-300"
                      />
-                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        <Search
-                           size={20}
-                           strokeWidth={2}
-                           className="text-[#8896f3]"
-                        />
+                     <div className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">
+                        <p>1</p>
                      </div>
                   </div>
-                  <div className="relative border-2 border-[#d4d9fb] rounded-full p-2">
-                     <Bell
-                        size={23}
-                        strokeWidth={2}
-                        className="text-[#8896f3]"
-                     />
-                  </div>
                </div>
-               <div className="my-7">
+               <div className="my-3">
                   <p className="font-bold text-3xl text-[#8896f3]">
                      Hello Rahil,
                   </p>
@@ -137,16 +172,23 @@ const Dashboard = () => {
                   </p>
                </div>
 
-               <div className="grid grid-cols-1 md:grid-cols-2 sm:grid-cols-1 gap-y-28 min-h-[600px] gap-x-5">
+               <div className="grid grid-cols-1 md:grid-cols-2 sm:grid-cols-1 gap-y-5 gap-x-5">
                   <div className="border-2 border-gray-200 rounded-2xl shadow-lg relative">
                      <div className="group p-5 relative mt-15">
-                        <Doughnut
-                           width={300}
-                           height={300}
-                           data={data}
-                           plugins={[centerTextPlugin]}
-                           className="drop-shadow-lg"
-                        />
+                        {balanceByMonth !== undefined &&
+                        totalExpense !== undefined ? (
+                           <Doughnut
+                              width={300}
+                              height={300}
+                              data={data}
+                              plugins={[centerTextPlugin]}
+                              className="drop-shadow-lg"
+                           />
+                        ) : (
+                           <p className="text-center text-gray-400">
+                              Loading chart...
+                           </p>
+                        )}
                      </div>
                      {[
                         {
@@ -157,7 +199,7 @@ const Dashboard = () => {
                         {
                            title: 'Balance',
                            color: '#8F9BFF',
-                           value: data.datasets[0].data[0],
+                           value: balanceByMonth,
                         },
                      ].map((item, index) => (
                         <div
@@ -190,9 +232,17 @@ const Dashboard = () => {
                                           name=""
                                           id=""
                                           value={balanceInput}
-                                          onChange={(e) =>
-                                             setBalanceInput(e.target.value)
-                                          }
+                                          onChange={(e) => {
+                                             setBalanceInput(e.target.value);
+                                             dispatch(
+                                                setBalanceByMonth({
+                                                   month: currentMonth,
+                                                   balanceByMonth: parseFloat(
+                                                      e.target.value
+                                                   ),
+                                                })
+                                             );
+                                          }}
                                           className="border indent-2 border-gray-300 rounded-md w-20"
                                           onKeyDown={(e) =>
                                              handleEditBalance(e)
@@ -234,7 +284,7 @@ const Dashboard = () => {
                               { icon: UserRoundCheck, name: 'Manually' },
                            ].map((Item, index) => (
                               <div className="flex items-center justify-center gap-2 rounded-2xl my-2">
-                                 <div>
+                                 <div key={index}>
                                     {/* <Item.icon
                                              size={screen.width > 768 ? 55 : 35}
                                              className="text-[#3f58f1] font-bold p-2 sm:p-2 md:p-2 lg:p-4 bg-white rounded-lg"
@@ -255,46 +305,16 @@ const Dashboard = () => {
                      <ExpenseCard />
                   </div>
 
-                  {showModal && <Model setShowModal={setShowModal} />}
+                  {showModal && (
+                     <Model
+                        setShowModal={setShowModal}
+                        currentMonth={currentMonth}
+                        totalExpense={totalExpense}
+                     />
+                  )}
 
-                  <div className="">
-                     <div className="border-b-2 border-[#ccc] pb-3 font-bold text-xl text-[#666666] mb-4">
-                        Recent Payments
-                     </div>
-
-                     <div className="overflow-auto customScrollbar h-[350px]">
-                        {dataMain?.map((value, index) => (
-                           <div
-                              key={index}
-                              className="shadow-md bg-[#dedde4] grid grid-cols-[50px_auto_auto_50px] items-center my-4 py-1 rounded-2xl">
-                              <div className=" text-center p-2">🔴</div>
-                              <div className=" text-center p-2">
-                                 <div className="text-left">
-                                    <p className="font-bold">
-                                       {value.transaction}
-                                    </p>
-                                    <p className="font-light text-sm">
-                                       {value.Date}
-                                    </p>
-                                 </div>
-                              </div>
-                              <div className=" text-center p-2">
-                                 {value.spendMoney}
-                              </div>
-                              <div className=" text-center p-2">
-                                 <FaArrowRight />
-                              </div>
-                           </div>
-                        ))}
-                     </div>
-                  </div>
-
-                  <div className="h-[480px]">
-                     <div className="border-b-2 border-[#ccc] pb-3 font-bold text-xl text-[#666666] mb-4">
-                        Monthly Expense
-                     </div>
-
-                     <div></div>
+                  <div className="border-2 h-screen col-span-2 border-gray-200 rounded-2xl shadow-xl">
+                     <Report />
                   </div>
                </div>
             </div>

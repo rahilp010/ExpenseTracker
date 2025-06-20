@@ -5,7 +5,7 @@ export const expenseSlice = createSlice({
     initialState: {
         addExpense: {
             expenseData: JSON.parse(localStorage.getItem('expenseData')) || [],
-            balance: JSON.parse(localStorage.getItem('balance')) || 0,
+            balanceByMonth: JSON.parse(localStorage.getItem('balanceByMonth')) || {},
             totalExpenses: 0,
             updateExpense: null,
             deleteExpense: null,
@@ -15,17 +15,21 @@ export const expenseSlice = createSlice({
     reducers: {
         addExpense: (state, action) => {
             state.addExpense.expenseData.push(action.payload)
-            const data = localStorage.setItem('expenseData', JSON.stringify(state.addExpense.expenseData))
+            localStorage.setItem('expenseData', JSON.stringify(state.addExpense.expenseData))
         },
         loadExpense: (state) => {
-            const data = localStorage.getItem('expenseData')
+            const data = localStorage.getItem('expenseData');
+            const balanceByMonth = localStorage.getItem('balanceByMonth');
             if (data) {
                 state.addExpense.expenseData = JSON.parse(data);
             }
-        },
+            if (balanceByMonth) {
+                state.addExpense.balanceByMonth = JSON.parse(balanceByMonth);
+            }
+        },        
         updateBalance: (state, action) => {
-            state.addExpense.balance = action.payload
-            localStorage.setItem('balance', JSON.stringify(state.addExpense.balance))
+            state.addExpense.balanceByMonth = action.payload
+            localStorage.setItem('balanceByMonth', JSON.stringify(state.addExpense.balanceByMonth))
         },
         updateExpense: (state, action) => {
             const { id, category, price, date, color, currentMonth } = action.payload
@@ -39,7 +43,7 @@ export const expenseSlice = createSlice({
                     price,
                     date,
                     color,
-                    availableBalance: state.addExpense.balance - parseFloat(price)
+                    availableBalance: state.addExpense.balanceByMonth[currentMonth] - parseFloat(price)
                 }
             }
             localStorage.setItem('expenseData', JSON.stringify(state.addExpense.expenseData))
@@ -54,6 +58,14 @@ export const expenseSlice = createSlice({
         deleteExpense: (state, action) => {
             state.addExpense.expenseData = state.addExpense.expenseData.filter(item => item.id != action.payload)
             localStorage.setItem('expenseData', JSON.stringify(state.addExpense.expenseData))
+        },
+        setBalanceByMonth: (state, action) => {
+            const { month, balanceByMonth } = action.payload
+            const current = state.addExpense.balanceByMonth || {};
+            const updatedBalances = { ...current, [month]: balanceByMonth };
+            state.addExpense.balanceByMonth = updatedBalances;
+        
+            localStorage.setItem('balanceByMonth', JSON.stringify(updatedBalances));
         }
     }
 })
@@ -65,8 +77,13 @@ export const selectTotalExpense = (state) => {
     );
 };
 
+export const selectMonthlyBalance = (state, month) => {
+    return state.expense.addExpense.balanceByMonth[month] ?? 10000
+}
 
 
-export const { addExpense, loadExpense, updateBalance, updateExpense, setIsUpdateExpense, setUpdateExpense, deleteExpense } = expenseSlice.actions
+
+
+export const { addExpense, loadExpense, updateBalance, updateExpense, setIsUpdateExpense, setUpdateExpense, deleteExpense, setBalanceByMonth } = expenseSlice.actions
 export default expenseSlice.reducer
 
