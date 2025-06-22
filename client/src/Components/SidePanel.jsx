@@ -6,8 +6,8 @@ import {
    ChevronLeft,
    UserRoundPen,
 } from 'lucide-react';
-import { GiRadarSweep } from 'react-icons/gi';
 import { NavLink, useLocation } from 'react-router';
+import tracksy from '../assets/Tracksy.png';
 
 const SidePanel = () => {
    const location = useLocation();
@@ -42,23 +42,25 @@ const SidePanel = () => {
             isOpen ? 'w-20 rounded-r-xl' : 'w-60 rounded-r-3xl'
          } transition-all duration-300 overflow-hidden`}>
          <div
-            class={`transition-all duration-300 ${
+            className={`transition-all duration-300 ${
                isOpen ? 'left-7' : 'right-3'
             }`}
             onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? (
-               <div className="flex justify-between items-center gap-3 my-3 ml-3">
-                  <GiRadarSweep
-                     className="h-10 text-yellow-400 -ml-2"
-                     size={35}
+               <div className="flex justify-between items-center gap-3 my-3">
+                  <img
+                     src={tracksy}
+                     alt=""
+                     srcset=""
+                     className="h-14 w-full drop-shadow-2xl"
                   />
                </div>
             ) : (
                <div className="flex justify-between items-center gap-3">
-                  <div
-                     className={`text-2xl font-bold tracking-wider px-2 my-3 text-yellow-400`}>
+                  <div className="text-2xl font-bold tracking-wider px-2 my-3 bg-gradient-to-r from-[#d4d9fb] via-[#1447e6] to-gray-800 text-transparent bg-clip-text">
                      Tracksy
                   </div>
+
                   <ChevronLeft className="h-10 text-gray-600" size={25} />
                </div>
             )}

@@ -1,28 +1,84 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { deleteExpense } from '../app/features/expenseSlice';
-import { Search, Trash } from 'lucide-react';
+import { Funnel, Search, Trash } from 'lucide-react';
 import { PiInfoThin } from 'react-icons/pi';
-import { IoIosInformation } from 'react-icons/io';
+
 const Report = () => {
    const expenses = useSelector(
       (state) => state.expense.addExpense.expenseData
    );
    const dispatch = useDispatch();
-
-   console.log(expenses);
+   const [isFilterOpen, setIsFilterOpen] = useState(false);
+   const [sort, setSort] = useState('Today');
 
    const [searchQuery, setSearchQuery] = useState('');
 
-   const filteredData = expenses.filter((data) => {
-      const query = searchQuery.toLowerCase();
+   const isToday = (dateString) => {
+      const today = new Date();
+      const expenseDate = new Date(dateString);
+
       return (
-         data.id.toString().includes(query) ||
-         data.date?.toLowerCase().includes(query) ||
-         data.category?.toLowerCase().includes(query) ||
-         data.price?.toString().includes(query)
+         expenseDate.getUTCDate() === today.getDate() &&
+         expenseDate.getMonth() === today.getMonth() &&
+         expenseDate.getFullYear() === today.getFullYear()
       );
-   });
+   };
+
+   const isThisWeek = (dateString) => {
+      const today = new Date();
+      const expenseDate = new Date(dateString);
+
+      // Set to Monday
+      const firstDayOfWeek = new Date(today);
+      firstDayOfWeek.setDate(today.getDate() - today.getDay() + 1);
+      firstDayOfWeek.setHours(0, 0, 0, 0);
+
+      // Set to Sunday
+      const lastDayOfWeek = new Date(today);
+      lastDayOfWeek.setDate(today.getDate() + (7 - today.getDay()));
+      lastDayOfWeek.setHours(23, 59, 59, 999);
+
+      return expenseDate >= firstDayOfWeek && expenseDate <= lastDayOfWeek;
+   };
+
+   const isThisMonth = (dateString) => {
+      const today = new Date();
+      const expenseDate = new Date(dateString);
+
+      return (
+         expenseDate.getMonth() === today.getMonth() &&
+         expenseDate.getFullYear() === today.getFullYear()
+      );
+   };
+
+   const isThisYear = (dateString) => {
+      const today = new Date();
+      const expenseDate = new Date(dateString);
+      return expenseDate.getFullYear() === today.getFullYear();
+   };
+
+   const filteredData = useMemo(() => {
+      const query = searchQuery.toLowerCase();
+      let result = expenses.filter((data) => {
+         return (
+            data.id.toString().includes(query) ||
+            data.date?.toLowerCase().includes(query) ||
+            data.category?.toLowerCase().includes(query) ||
+            data.price?.toString().includes(query)
+         );
+      });
+      if (sort) {
+         result = result.filter((item) => {
+            if (sort === 'Today') return isToday(item.date);
+            if (sort === 'This Week') return isThisWeek(item.date);
+            if (sort === 'This Month') return isThisMonth(item.date);
+            if (sort === 'This Year') return isThisYear(item.date);
+            return true;
+         });
+      }
+      return result;
+   }, [expenses, searchQuery, sort]);
 
    return (
       <div className="p-6">
@@ -30,14 +86,32 @@ const Report = () => {
          <h2 className="text-2xl font-bold text-gray-800 mb-6">
             📊 Expense Report
          </h2>
-         <div className="flex justify-end my-3">
+         {isFilterOpen && (
+            <div className="w-full transition-all duration-300 fade-in">
+               <div className="flex flex-col w-40 border-2 border-b-4 indent-2 border-[#d4d9fb] outline-none focus:ring-2 focus:ring-[#8896f3] focus:border-b-4 rounded-2xl p-2 gap-2">
+                  <select
+                     name="sort"
+                     id="sort"
+                     value={sort}
+                     onChange={(e) => setSort(e.target.value)}
+                     className="flex border-none outline-none cursor-pointer">
+                     <option value="">All</option>
+                     <option value="Today">Today</option>
+                     <option value="This Week">This Week</option>
+                     <option value="This Month">This Month</option>
+                     <option value="This Year">This Year</option>
+                  </select>
+               </div>
+            </div>
+         )}
+         <div className="flex justify-end items-center gap-3 my-3">
             <div className="relative w-64">
                <input
                   type="text"
                   value={searchQuery?.toLowerCase() || ''}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search..."
-                  className="w-full p-2 rounded-xl border-2 indent-2 border-[#d4d9fb] outline-none focus:border-[#8896f3]"
+                  className="w-full p-2 rounded-xl border-2 border-b-4 indent-2 border-[#d4d9fb] outline-none focus:border-[#8896f3] focus:border-b-4"
                />
                <div className="absolute right-1.5 top-1/2 -translate-y-1/2">
                   <Search
@@ -46,6 +120,14 @@ const Report = () => {
                      className="text-[#2e48ef] bg-[#d4d9fb] p-2 rounded-lg"
                   />
                </div>
+            </div>
+            <div className="cursor-pointer">
+               <Funnel
+                  size={35}
+                  strokeWidth={2}
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                  className="text-[#2e48ef] bg-[#d4d9fb] p-2 rounded-lg hover:scale-110 transition-all duration-300 hover:bg-[#2e48ef]/10 "
+               />
             </div>
          </div>
 
@@ -64,7 +146,7 @@ const Report = () => {
                   </tr>
                </thead>
                <tbody className="text-gray-700 text-sm divide-y divide-gray-100">
-                  {filteredData.length > 0 ? (
+                  {filteredData?.length > 0 ? (
                      filteredData.map((expense, index) => (
                         <tr
                            key={expense.id}
@@ -101,9 +183,9 @@ const Report = () => {
                   ) : (
                      <tr>
                         <td
-                           colSpan="5"
-                           className="px-4 py-6 text-center text-gray-400">
-                           No expenses found.
+                           colSpan={5}
+                           className="px-4 py-40 text-center text-gray-400 font-bold">
+                           No Data Found.
                         </td>
                      </tr>
                   )}

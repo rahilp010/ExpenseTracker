@@ -2,12 +2,8 @@ import React, { useEffect, useState } from 'react';
 import SidePanel from '../Components/SidePanel';
 import { useDarkMode } from '../Components/DarkModeContext';
 import { Chart as ChartJs, defaults } from 'chart.js/auto';
-import { Bar } from 'react-chartjs-2';
 import { Doughnut } from 'react-chartjs-2';
-import { FaArrowRight } from 'react-icons/fa';
-import FlipCard from '../Animations/FlipCard';
 import {
-   Search,
    Bell,
    Plus,
    Mail,
@@ -27,6 +23,7 @@ import {
 } from '../app/features/expenseSlice';
 import Report from '../Components/Report';
 import { months } from '../data';
+import Loader from '../Animations/Loader';
 
 defaults.maintainAspectRatio = false;
 defaults.responsive = true;
@@ -44,7 +41,6 @@ const Dashboard = () => {
    const addExpenseData = useSelector(
       (state) => state.expense.addExpense.expenseData
    );
-   console.log('addExpenseData', addExpenseData);
 
    const balanceByMonth = useSelector((state) =>
       selectMonthlyBalance(state, currentMonth)
@@ -102,14 +98,10 @@ const Dashboard = () => {
    const validBalance =
       typeof balanceByMonth === 'number' ? Math.abs(balanceByMonth) : 0;
 
-   
    const validExpense = currentMonthExpenses.reduce(
       (acc, item) => acc + Number(item.price || 0),
       0
    );
-
-   console.log(validExpense);
-
 
    const remainingBalance = Math.max(validBalance - validExpense, 0);
 
@@ -186,7 +178,7 @@ const Dashboard = () => {
                            />
                         ) : (
                            <p className="text-center text-gray-400">
-                              Loading chart...
+                              <Loader />
                            </p>
                         )}
                      </div>
@@ -203,6 +195,7 @@ const Dashboard = () => {
                         },
                      ].map((item, index) => (
                         <div
+                           key={index}
                            className={`flex flex-col items-end mt-5 absolute top-0 ${
                               index === 0 ? 'right-7' : 'left-7'
                            }`}>
@@ -283,8 +276,10 @@ const Dashboard = () => {
                               { icon: Scan, name: 'Library' },
                               { icon: UserRoundCheck, name: 'Manually' },
                            ].map((Item, index) => (
-                              <div className="flex items-center justify-center gap-2 rounded-2xl my-2">
-                                 <div key={index}>
+                              <div
+                                 key={index}
+                                 className="flex items-center justify-center gap-2 rounded-2xl my-2">
+                                 <div>
                                     {/* <Item.icon
                                              size={screen.width > 768 ? 55 : 35}
                                              className="text-[#3f58f1] font-bold p-2 sm:p-2 md:p-2 lg:p-4 bg-white rounded-lg"
@@ -301,7 +296,7 @@ const Dashboard = () => {
                      </div>
                   </div>
 
-                  <div className="">
+                  <div>
                      <ExpenseCard />
                   </div>
 

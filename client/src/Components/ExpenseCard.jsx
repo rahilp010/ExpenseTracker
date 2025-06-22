@@ -3,7 +3,6 @@ import {
    EllipsisVertical,
    MoveLeft,
    MoveRight,
-   Pencil,
    PenLine,
 } from 'lucide-react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
@@ -249,8 +248,7 @@ const ExpenseChartCard = () => {
             </div>
             <img
                src={savedMoney}
-               alt=""
-               srcset=""
+               alt='saveMoney'
                className="w-96 h-52 object-cover drop-shadow-xl"
             />
          </div>

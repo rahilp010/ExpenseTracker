@@ -10,6 +10,7 @@ import {
    updateExpense,
    deleteExpense,
 } from '../app/features/expenseSlice';
+import { setIsUpdateExpense } from '../app/features/expenseSlice';
 import { data } from 'react-router';
 
 const Model = ({
@@ -40,6 +41,34 @@ const Model = ({
    const existingCategories = addExpenseData
       .filter((item) => item.monthOfExpense === currentMonth)
       .map((e) => e.category);
+
+   const duplicateCategories = existingCategories.filter(
+      (item, index) => existingCategories.indexOf(item) !== index
+   );
+
+   const uniqueDuplicatesCategory = [...new Set(selectedCategories)];
+
+   const uniqueDuplicates = [...new Set(duplicateCategories)];
+
+   console.log('Duplicate Categories:', uniqueDuplicates);
+
+   const matchedExpenses = addExpenseData.filter((item) =>
+      uniqueDuplicates.includes(item.category)
+   );
+
+   console.log(matchedExpenses);
+
+   const multipleExpenseValue = matchedExpenses.filter(
+      (item) => item.monthOfExpense === currentMonth
+   );
+
+   const updatedPriceAfterCombine = multipleExpenseValue?.reduce(
+      (acc, curr) => acc + parseFloat(curr.price || 0),
+      0
+   );
+   console.log(updatedPriceAfterCombine);
+
+   console.log('Matching Expenses:', multipleExpenseValue);
 
    useEffect(() => {
       dispatch(loadExpense());
@@ -107,6 +136,7 @@ const Model = ({
          setPrice('');
       }, 800);
    };
+   console.log('hii', uniqueDuplicates.includes(data));
 
    const handleUpdateExpense = (e) => {
       e.preventDefault();
@@ -187,6 +217,9 @@ const Model = ({
                   onClick={() => {
                      setShowModal(false);
                      dispatch(setIsUpdateExpense(false));
+                     // setSelectedCategories([]);
+                     // setCategoryPrices({});
+                     // setPrice('');
                   }}
                />
                <div className="mb-4">
@@ -200,7 +233,7 @@ const Model = ({
                      style={{
                         gridTemplateColumns: `repeat(${
                            isUpdateExpense
-                              ? existingCategories.length
+                              ? uniqueDuplicatesCategory.length
                               : categories.length
                         }, minmax(0, 1fr))`,
                      }}>
@@ -242,7 +275,8 @@ const Model = ({
                </div>
                {isUpdateExpense ? (
                   <div className="grid grid-cols-2 gap-3">
-                     {selectedCategories.map((data, index) => {
+                     {console.log('selected', new Set(selectedCategories))}
+                     {uniqueDuplicatesCategory.map((data, index) => {
                         return (
                            <div key={index}>
                               <label
@@ -257,7 +291,11 @@ const Model = ({
                                     name="price"
                                     id="price"
                                     placeholder="0.00"
-                                    value={categoryPrices[data] || ''}
+                                    value={
+                                       uniqueDuplicates.includes(data)
+                                          ? updatedPriceAfterCombine
+                                          : categoryPrices[data] || ''
+                                    }
                                     onChange={(e) =>
                                        handlePriceChange(data, e.target.value)
                                     }
