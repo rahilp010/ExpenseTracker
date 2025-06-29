@@ -1,10 +1,8 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { setTheme } from '../app/features/settingsSlice';
 
 // Create Context
 const DarkModeContext = createContext();
-
-const themeData = localStorage.getItem('theme');
-console.log('themeData', themeData);
 
 // Custom Hook to use Dark Mode Context
 export const useDarkMode = () => {
@@ -13,22 +11,15 @@ export const useDarkMode = () => {
 
 // Provider Component
 export const DarkModeProvider = ({ children }) => {
-   const [isDarkMode, setIsDarkMode] = useState(false);
+   const [isDarkMode, setIsDarkMode] = useState(false); // default to false or use logic from localStorage
 
    const toggleDarkMode = () => {
       setIsDarkMode((prevMode) => !prevMode);
-      if(themeData === 1){
-         setIsDarkMode(false)
-      }else if ( themeData === 2){
-         setIsDarkMode(true)
-      } else if (themeData === 3){
-         const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches
-         setIsDarkMode(systemPrefersLight ? false : true)
-      }
    };
 
    return (
-      <DarkModeContext.Provider value={{ isDarkMode, toggleDarkMode }}>
+      <DarkModeContext.Provider
+         value={{ isDarkMode, toggleDarkMode, setIsDarkMode }}>
          {children}
       </DarkModeContext.Provider>
    );

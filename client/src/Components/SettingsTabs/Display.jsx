@@ -10,7 +10,7 @@ const Display = () => {
    const dispatch = useDispatch();
    const theme = useSelector((state) => state.settings.theme);
    console.log('theme', theme);
-   const { isDarkMode } = useDarkMode();
+   const { isDarkMode, toggleDarkMode, setIsDarkMode } = useDarkMode();
    const themes = [
       {
          id: 1,
@@ -32,26 +32,39 @@ const Display = () => {
    const [selectedTheme, setSelectedTheme] = useState(themes[0].id);
 
    const handleThemeChange = (themeId) => {
+      localStorage.setItem('theme', themeId); // optional: persist
       setSelectedTheme(themeId); // update local state
       dispatch(setTheme(themeId)); // update Redux state
-      localStorage.setItem('theme', themeId); // optional: persist
+
+      if (themeId === 1) setIsDarkMode(false);
+      else if (themeId === 2) setIsDarkMode(true);
+      else if (themeId === 3) {
+         const prefersDark = window.matchMedia(
+            '(prefers-color-scheme: dark)'
+         ).matches;
+         setIsDarkMode(prefersDark);
+      }
    };
 
    useEffect(() => {
-      const savedTheme = parseInt(localStorage.getItem('theme'));
-      if (savedTheme) {
-         setSelectedTheme(savedTheme);
-         dispatch(setTheme(savedTheme));
-      }
+      if (selectedTheme === 3) {
+         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)').matches
+         console.log('systemTheme',mediaQuery);
+         
+        //  const handleChange = (e) => setIsDarkMode(e.matches);
 
-      if (savedTheme === 3) {
-         const systemPrefersLight = window.matchMedia(
-            '(prefers-color-scheme: light)'
-         ).matches;
-
-         dispatch(setTheme(systemPrefersLight ? 1 : 2));
+        //  mediaQuery.addEventListener('change', handleChange);
+        //  return () => mediaQuery.removeEventListener('change', handleChange);
       }
-   }, []);
+   }, [selectedTheme]);
+
+   useEffect(() => {
+      if (isDarkMode) {
+         document.documentElement.classList.add('dark');
+      } else {
+         document.documentElement.classList.remove('dark');
+      }
+   }, [isDarkMode]);
 
    return (
       <div className="flex flex-col gap-4 my-7 overflow-y-auto h-[calc(100vh-10rem)]">
