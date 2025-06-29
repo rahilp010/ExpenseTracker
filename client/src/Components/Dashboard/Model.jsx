@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { categories } from '../data';
+import { categories } from '../../data';
 import { CircleX } from 'lucide-react';
 import { toast } from 'react-toastify';
-import Loader from '../Animations/Loader';
+import Loader from '../../Animations/Loader';
 import { useDispatch, useSelector } from 'react-redux';
 import {
    addExpense,
    loadExpense,
    updateExpense,
-   deleteExpense,
-} from '../app/features/expenseSlice';
-import { setIsUpdateExpense } from '../app/features/expenseSlice';
+} from '../../app/features/expenseSlice';
 import { data } from 'react-router';
 
 const Model = ({

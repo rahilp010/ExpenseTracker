@@ -1,5 +1,5 @@
 import React from 'react'
-import SidePanel from '../Components/SidePanel'
+import SidePanel from '../Components/Dashboard/SidePanel'
 
 const History = () => {
   return (

@@ -7,7 +7,7 @@ import {
    UserRoundPen,
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router';
-import tracksy from '../assets/Tracksy.png';
+import tracksy from '../../assets/Tracksy.png';
 
 const SidePanel = () => {
    const location = useLocation();
@@ -51,7 +51,7 @@ const SidePanel = () => {
                   <img
                      src={tracksy}
                      alt=""
-                     srcset=""
+                     srcSet=""
                      className="h-14 w-full drop-shadow-2xl"
                   />
                </div>

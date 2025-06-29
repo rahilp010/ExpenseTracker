@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { deleteExpense } from '../app/features/expenseSlice';
+import { deleteExpense } from '../../app/features/expenseSlice';
 import { Funnel, Search, Trash } from 'lucide-react';
 import { PiInfoThin } from 'react-icons/pi';
 
@@ -10,7 +10,7 @@ const Report = () => {
    );
    const dispatch = useDispatch();
    const [isFilterOpen, setIsFilterOpen] = useState(false);
-   const [sort, setSort] = useState('Today');
+   const [sort, setSort] = useState('This Month');
 
    const [searchQuery, setSearchQuery] = useState('');
 
@@ -23,23 +23,6 @@ const Report = () => {
          expenseDate.getMonth() === today.getMonth() &&
          expenseDate.getFullYear() === today.getFullYear()
       );
-   };
-
-   const isThisWeek = (dateString) => {
-      const today = new Date();
-      const expenseDate = new Date(dateString);
-
-      // Set to Monday
-      const firstDayOfWeek = new Date(today);
-      firstDayOfWeek.setDate(today.getDate() - today.getDay() + 1);
-      firstDayOfWeek.setHours(0, 0, 0, 0);
-
-      // Set to Sunday
-      const lastDayOfWeek = new Date(today);
-      lastDayOfWeek.setDate(today.getDate() + (7 - today.getDay()));
-      lastDayOfWeek.setHours(23, 59, 59, 999);
-
-      return expenseDate >= firstDayOfWeek && expenseDate <= lastDayOfWeek;
    };
 
    const isThisMonth = (dateString) => {
@@ -71,7 +54,6 @@ const Report = () => {
       if (sort) {
          result = result.filter((item) => {
             if (sort === 'Today') return isToday(item.date);
-            if (sort === 'This Week') return isThisWeek(item.date);
             if (sort === 'This Month') return isThisMonth(item.date);
             if (sort === 'This Year') return isThisYear(item.date);
             return true;
@@ -87,8 +69,8 @@ const Report = () => {
             📊 Expense Report
          </h2>
          {isFilterOpen && (
-            <div className="w-full transition-all duration-300 fade-in">
-               <div className="flex flex-col w-40 border-2 border-b-4 indent-2 border-[#d4d9fb] outline-none focus:ring-2 focus:ring-[#8896f3] focus:border-b-4 rounded-2xl p-2 gap-2">
+            <div className="w-full transition-all duration-300 bg-gray-200/40 p-3 rounded-xl fade-in">
+               <div className="flex flex-col w-40 border-2 border-b-4 indent-2 border-[#d4d9fb] outline-none focus:ring-2 focus:ring-[#8896f3] focus:border-b-4 rounded-2xl p-2 gap-2 bg-white">
                   <select
                      name="sort"
                      id="sort"
@@ -97,7 +79,6 @@ const Report = () => {
                      className="flex border-none outline-none cursor-pointer">
                      <option value="">All</option>
                      <option value="Today">Today</option>
-                     <option value="This Week">This Week</option>
                      <option value="This Month">This Month</option>
                      <option value="This Year">This Year</option>
                   </select>
@@ -136,7 +117,7 @@ const Report = () => {
             <table className="min-w-full table-auto">
                <thead
                   className="bg-[#e0e2f3] text-gray-700 text-sm font-semibold uppercase tracking-wide"
-                  style={{ position: 'sticky', top: 0, zIndex: 1000 }}>
+                  style={{ position: 'sticky', top: 0, zIndex: 10 }}>
                   <tr>
                      <th className="px-4 py-3 text-left">ID</th>
                      <th className="px-4 py-3 text-left">Date</th>

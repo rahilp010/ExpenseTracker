@@ -26,7 +26,7 @@ export const expenseSlice = createSlice({
             if (balanceByMonth) {
                 state.addExpense.balanceByMonth = JSON.parse(balanceByMonth);
             }
-        },        
+        },
         updateBalance: (state, action) => {
             state.addExpense.balanceByMonth = action.payload
             localStorage.setItem('balanceByMonth', JSON.stringify(state.addExpense.balanceByMonth))
@@ -64,7 +64,7 @@ export const expenseSlice = createSlice({
             const current = state.addExpense.balanceByMonth || {};
             const updatedBalances = { ...current, [month]: balanceByMonth };
             state.addExpense.balanceByMonth = updatedBalances;
-        
+
             localStorage.setItem('balanceByMonth', JSON.stringify(updatedBalances));
         }
     }

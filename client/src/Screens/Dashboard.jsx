@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import SidePanel from '../Components/SidePanel';
+import SidePanel from '../Components/Dashboard/SidePanel';
 import { useDarkMode } from '../Components/DarkModeContext';
 import { Chart as ChartJs, defaults } from 'chart.js/auto';
 import { Doughnut } from 'react-chartjs-2';
@@ -12,8 +12,8 @@ import {
    Pencil,
    CircleX,
 } from 'lucide-react';
-import ExpenseCard from '../Components/ExpenseCard';
-import Model from '../Components/Model';
+import ExpenseCard from '../Components/Dashboard/ExpenseCard';
+import Model from '../Components/Dashboard/Model';
 import { useDispatch, useSelector } from 'react-redux';
 import {
    loadExpense,
@@ -21,18 +21,12 @@ import {
    selectTotalExpense,
    setBalanceByMonth,
 } from '../app/features/expenseSlice';
-import Report from '../Components/Report';
+import Report from '../Components/Dashboard/Report';
 import { months } from '../data';
 import Loader from '../Animations/Loader';
 
 defaults.maintainAspectRatio = false;
 defaults.responsive = true;
-
-const dataMain = [
-   { transaction: 'Daily', Date: 'Sep 10, 2024', spendMoney: '₹3,000' },
-   { transaction: 'Groceries', Date: 'Sep 9, 2024', spendMoney: '₹1,500' },
-   { transaction: 'Subscription', Date: 'Sep 8, 2024', spendMoney: '₹899' },
-];
 
 const Dashboard = () => {
    const { isDarkMode } = useDarkMode();

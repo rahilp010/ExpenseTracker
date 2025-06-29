@@ -1,20 +1,15 @@
 import { Doughnut } from 'react-chartjs-2';
-import {
-   EllipsisVertical,
-   MoveLeft,
-   MoveRight,
-   PenLine,
-} from 'lucide-react';
+import { EllipsisVertical, MoveLeft, MoveRight, PenLine } from 'lucide-react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import savedMoney from '../assets/savedMoney.webp';
+import savedMoney from '../../assets/savedMoney.webp';
 import Model from './Model';
 import {
    selectMonthlyBalance,
    setIsUpdateExpense,
-} from '../app/features/expenseSlice';
-import { months } from '../data';
+} from '../../app/features/expenseSlice';
+import { months } from '../../data';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -248,7 +243,7 @@ const ExpenseChartCard = () => {
             </div>
             <img
                src={savedMoney}
-               alt='saveMoney'
+               alt="saveMoney"
                className="w-96 h-52 object-cover drop-shadow-xl"
             />
          </div>
