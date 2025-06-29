@@ -2,8 +2,11 @@ import React, { useEffect, useState } from 'react';
 import SidePanel from '../Components/Dashboard/SidePanel';
 import ProfileSettings from '../Components/SettingsTabs/ProfileSettings';
 import AccountSettings from '../Components/SettingsTabs/AccountSettings';
+import Display from '../Components/SettingsTabs/Display';
+import { useDarkMode } from '../Components/DarkModeContext';
 
 const Settings = () => {
+   const { isDarkMode } = useDarkMode();
    const Tabs = [
       {
          id: 1,
@@ -18,7 +21,7 @@ const Settings = () => {
       {
          id: 3,
          title: 'Display',
-         component: <ProfileSettings />,
+         component: <Display />,
       },
       {
          id: 4,
@@ -30,7 +33,14 @@ const Settings = () => {
    const [activeTab, setActiveTab] = useState(0);
 
    return (
-      <div className="flex transition-all duration-300 border-2 border-gray-300 rounded-2xl h-[calc(100vh-2rem)] overflow-y-hidden bg-[#f5f7fb] relative">
+      <div
+         className={`flex transition-all duration-300 rounded-2xl h-[calc(100vh-2rem)] overflow-y-hidden relative
+            ${
+               isDarkMode
+                  ? 'bg-[#111111] text-white'
+                  : 'bg-[#f5f7fb] border-2 border-gray-300'
+            }
+         `}>
          <SidePanel />
          <div className="flex-1 p-6 overflow-y-auto min-h-screen customScrollbar">
             <div className="flex gap-4 items-center absolute bottom-0 font-medium -translate-1/2 left-9 text-gray-500 text-sm">
@@ -45,18 +55,25 @@ const Settings = () => {
             <div className="h-[calc(100vh-8rem)] ">
                <p className="text-2xl font-bold">Settings</p>
 
-               <div className="flex border w-fit my-5  border-gray-300 rounded-xl overflow-hidden">
+               <div
+                  className={`flex w-fit my-5   rounded-xl overflow-hidden
+                     ${
+                        isDarkMode
+                           ? 'bg-[#222222]'
+                           : 'bg-white border border-gray-300'
+                     }
+                  `}>
                   {Tabs.map((tab, index) => (
                      <div
                         key={index}
                         onClick={() => setActiveTab(index)}
-                        className={`p-1.5 px-6 hover:bg-gray-200 cursor-pointer transition-all duration-200 ${
+                        className={`p-1.5 px-6 ${isDarkMode ? 'hover:bg-white/10' : 'hover:bg-gray-200'} cursor-pointer transition-all duration-200 ${
                            index === 0 ? 'rounded-l-xl' : ''
                         } ${
                            index === Tabs.length - 1 ? 'rounded-r-xl' : ''
                         } hover:border-b-3 hover:border-[#6766e8] ${
                            activeTab === index
-                              ? 'text-[#6766e8] border-b-3 border-[#6766e8] bg-gray-200 font-bold transition-all duration-200 '
+                              ? `text-[#6766e8] border-b-3 border-[#6766e8] ${isDarkMode ? 'bg-white/10' : 'bg-gray-200'} font-bold transition-all duration-200 `
                               : ''
                         }`}>
                         {tab.title}

@@ -12,6 +12,7 @@ export const settingsSlice = createSlice({
             isLoading: false,
         },
         accountSettingsData: {},
+        theme: localStorage.getItem('theme') || 1
     },
     reducers: {
         updateProfileSettings: (state, action) => {
@@ -26,9 +27,13 @@ export const settingsSlice = createSlice({
         },
         setLoading: (state, action) => {
             state.profileSettingsData.isLoading = action.payload
+        },
+        setTheme: (state, action) => {
+            state.theme = action.payload
+            localStorage.setItem('theme', action.payload)
         }
     }
 })
 
-export const { updateProfileSettings, loadProfileSettings, setLoading } = settingsSlice.actions
+export const { updateProfileSettings, loadProfileSettings, setLoading, setTheme } = settingsSlice.actions
 export default settingsSlice.reducer

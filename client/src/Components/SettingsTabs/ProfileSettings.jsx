@@ -10,8 +10,10 @@ import {
 } from '../../app/features/settingsSlice';
 import { toast } from 'react-toastify';
 import Loader from '../../Animations/Loader';
+import { useDarkMode } from '../DarkModeContext';
 
 const ProfileSettings = () => {
+   const { isDarkMode } = useDarkMode();
    const dispatch = useDispatch();
 
    const profileSettingsData = useSelector(
@@ -73,7 +75,9 @@ const ProfileSettings = () => {
             <img
                src={image || profileSettingsData.image || mine}
                alt="Profile"
-               className="w-32 h-32 rounded-2xl border-2 border-b-4 border-gray-300 object-cover"
+               className={`w-32 h-32 rounded-2xl  object-cover
+                  ${isDarkMode ? '' : 'border-2 border-b-4 border-gray-300'}
+               `}
             />
             <div>
                <p className="font-medium">Profile Picture</p>
@@ -135,15 +139,27 @@ const ProfileSettings = () => {
                      placeholder={item.placeHolder}
                      value={formData[item.name] || ''}
                      onChange={handleInputChange}
-                     className="w-full p-2 rounded-lg border-2 border-b-4 indent-2 border-[#d4d9fb] outline-none focus:border-[#8896f3] focus:border-b-4"
+                     className={`w-full p-2 rounded-lg indent-2
+                        ${
+                           isDarkMode
+                              ? 'bg-[#222222] border-b-2'
+                              : 'border-2 border-b-4 border-[#d4d9fb]'
+                        }
+                        outline-none focus:border-[#8896f3] focus:border-b-4
+                     `}
                   />
                </div>
             ))}
 
-            {/* Update Button */}
             <p
                onClick={handleUpdateProfileSettings}
-               className="border-2 border-b-4 border-[#b7c0ff] text-white bg-[#6766e8] hover:bg-[#6766e8]/90 h-fit py-2 px-5 rounded-lg transition duration-300 col-span-full sm:col-auto text-center cursor-pointer">
+               className={`bg-[#6766e8]  hover:bg-[#6766e8]/90 h-fit py-2 px-5 rounded-lg transition duration-300 col-span-full sm:col-auto text-center cursor-pointer
+                  ${
+                     isDarkMode
+                        ? 'border-b-2'
+                        : 'border-2 border-b-4 border-[#b7c0ff]'
+                  }
+               `}>
                Update
             </p>
          </div>

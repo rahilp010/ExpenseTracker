@@ -3,8 +3,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import { deleteExpense } from '../../app/features/expenseSlice';
 import { Funnel, Search, Trash } from 'lucide-react';
 import { PiInfoThin } from 'react-icons/pi';
+import { useDarkMode } from '../DarkModeContext';
 
 const Report = () => {
+   const { isDarkMode } = useDarkMode();
+
    const expenses = useSelector(
       (state) => state.expense.addExpense.expenseData
    );
@@ -65,12 +68,21 @@ const Report = () => {
    return (
       <div className="p-6">
          {/* Title */}
-         <h2 className="text-2xl font-bold text-gray-800 mb-6">
+         <h2
+            className={`text-2xl font-bold ${
+               isDarkMode ? 'text-white' : 'text-gray-800'
+            } mb-6`}>
             📊 Expense Report
          </h2>
          {isFilterOpen && (
-            <div className="w-full transition-all duration-300 bg-gray-200/40 p-3 rounded-xl fade-in">
-               <div className="flex flex-col w-40 border-2 border-b-4 indent-2 border-[#d4d9fb] outline-none focus:ring-2 focus:ring-[#8896f3] focus:border-b-4 rounded-2xl p-2 gap-2 bg-white">
+            <div
+               className={`w-full transition-all duration-300 ${
+                  isDarkMode ? 'bg-[#222222]' : 'bg-gray-200/40'
+               } p-3 rounded-xl fade-in`}>
+               <div
+                  className={`flex flex-col w-40 border-2 border-b-4 indent-2 border-[#d4d9fb] outline-none focus:ring-2 focus:ring-[#8896f3] focus:border-b-4 rounded-2xl p-2 gap-2 ${
+                     isDarkMode ? 'bg-[#222222]' : 'bg-white'
+                  }`}>
                   <select
                      name="sort"
                      id="sort"
@@ -92,7 +104,9 @@ const Report = () => {
                   value={searchQuery?.toLowerCase() || ''}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search..."
-                  className="w-full p-2 rounded-xl border-2 border-b-4 indent-2 border-[#d4d9fb] outline-none focus:border-[#8896f3] focus:border-b-4"
+                  className={`w-full p-2 rounded-xl border-2 border-b-4 indent-2 border-[#d4d9fb] outline-none focus:border-[#8896f3] focus:border-b-4
+                     ${isDarkMode ? 'bg-[#222222]' : 'bg-white'}
+                  `}
                />
                <div className="absolute right-1.5 top-1/2 -translate-y-1/2">
                   <Search
@@ -113,10 +127,19 @@ const Report = () => {
          </div>
 
          {/* Table */}
-         <div className="overflow-x-auto shadow-lg rounded-xl border border-gray-200 bg-white h-[400px] customScrollbar">
+         <div
+            className={`overflow-x-auto shadow-lg rounded-xl  h-[400px] customScrollbar
+               ${
+                  isDarkMode
+                     ? 'bg-[#111111]'
+                     : 'bg-white border border-gray-200'
+               }
+            `}>
             <table className="min-w-full table-auto">
                <thead
-                  className="bg-[#e0e2f3] text-gray-700 text-sm font-semibold uppercase tracking-wide"
+                  className={` text-sm font-semibold uppercase tracking-wide
+                     ${isDarkMode ? 'bg-[#d3d8fa] text-black' : 'bg-[#e0e2f3] text-gray-700'}
+                  `}
                   style={{ position: 'sticky', top: 0, zIndex: 10 }}>
                   <tr>
                      <th className="px-4 py-3 text-left">ID</th>
@@ -126,12 +149,21 @@ const Report = () => {
                      <th className="px-4 py-3 text-left">Action</th>
                   </tr>
                </thead>
-               <tbody className="text-gray-700 text-sm divide-y divide-gray-100">
+               <tbody
+                  className={` text-sm divide-y divide-gray-200
+                     ${isDarkMode ? 'text-white' : 'text-gray-700'}
+                  `}>
                   {filteredData?.length > 0 ? (
                      filteredData.map((expense, index) => (
                         <tr
                            key={expense.id}
-                           className="hover:bg-gray-100 transition-colors">
+                           className={`transition-colors
+                              ${
+                                 isDarkMode
+                                    ? 'hover:bg-[#1c1c1c]'
+                                    : 'hover:bg-gray-100'
+                              }
+                           `}>
                            <td className="px-4 py-3">{index + 1}</td>
                            <td className="px-4 py-3">
                               {expense.date?.split('T')[0] || 'N/A'}

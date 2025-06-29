@@ -10,6 +10,7 @@ import {
    updateExpense,
 } from '../../app/features/expenseSlice';
 import { data } from 'react-router';
+import { useDarkMode } from '../DarkModeContext';
 
 const Model = ({
    setShowModal,
@@ -17,6 +18,7 @@ const Model = ({
    currentMonth,
    totalExpense,
 }) => {
+   const { isDarkMode } = useDarkMode();
    const dispatch = useDispatch();
    const addExpenseData = useSelector(
       (state) => state.expense.addExpense.expenseData
@@ -205,7 +207,10 @@ const Model = ({
          role="dialog">
          <form
             onSubmit={isUpdateExpense ? handleUpdateExpense : handleAddExpense}>
-            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg relative">
+            <div
+               className={`p-6 rounded-lg shadow-lg w-full max-w-lg relative
+               ${isDarkMode ? 'bg-[#222222]' : 'bg-white'}
+               `}>
                <p className="text-lg font-semibold mb-4">
                   {isUpdateExpense ? 'Update Expense' : 'Add Expense'}
                </p>

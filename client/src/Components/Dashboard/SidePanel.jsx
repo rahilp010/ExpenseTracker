@@ -8,8 +8,10 @@ import {
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router';
 import tracksy from '../../assets/Tracksy.png';
+import { useDarkMode } from '../DarkModeContext';
 
 const SidePanel = () => {
+   const { isDarkMode } = useDarkMode();
    const location = useLocation();
    const [isOpen, setIsOpen] = useState(true);
 
@@ -38,7 +40,9 @@ const SidePanel = () => {
 
    return (
       <div
-         className={`relative bg-[#e7e9f9] py-6 px-4 flex flex-col gap-6 text-sm h-[calc(100vh-2rem)] ${
+         className={`relative ${
+            isDarkMode ? 'bg-[#222222]' : 'bg-[#e7e9f9]'
+         }  py-6 px-4 flex flex-col gap-6 text-sm h-[calc(100vh-2rem)] ${
             isOpen ? 'w-20 rounded-r-xl' : 'w-60 rounded-r-3xl'
          } transition-all duration-300 overflow-hidden`}>
          <div

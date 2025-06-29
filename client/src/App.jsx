@@ -6,8 +6,10 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Report from './Screens/Report.jsx';
 import History from './Screens/History.jsx';
+import { useDarkMode } from './Components/DarkModeContext';
 
 const App = () => {
+   const { isDarkMode } = useDarkMode();
    const paths = [
       { path: '/', element: <Dashboard /> },
       { path: '/history', element: <History /> },
@@ -16,7 +18,7 @@ const App = () => {
    ];
 
    return (
-      <div className="m-4">
+      <div className={`p-4 ${isDarkMode ? 'bg-black/90 shadow-2xl' : 'bg-[#f5f7fb]'}`}>
          <ToastContainer />
          <Routes>
             {paths.map(({ path, element }) => (

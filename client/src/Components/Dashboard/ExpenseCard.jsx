@@ -10,36 +10,12 @@ import {
    setIsUpdateExpense,
 } from '../../app/features/expenseSlice';
 import { months } from '../../data';
+import { useDarkMode } from '../DarkModeContext';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const centerTextPlugin = {
-   id: 'centerText',
-   beforeDraw: (chart) => {
-      const { width, height } = chart;
-      const ctx = chart.ctx;
-      ctx.restore();
-      const fontSize = (height / 150).toFixed(2);
-      ctx.font = `${fontSize}em sans-serif`;
-      ctx.textBaseline = 'middle';
-
-      const { text1 = 'Total', text2 = '₹0' } =
-         chart?.config?.options?.plugins?.centerText || {};
-
-      const textX1 = Math.round((width - ctx.measureText(text1).width) / 2);
-      const textX2 = Math.round((width - ctx.measureText(text2).width) / 2);
-
-      ctx.fillStyle = '#999';
-      ctx.fillText(text1, textX1, height / 2.2);
-
-      ctx.font = `bold ${fontSize * 1.2}em sans-serif`;
-      ctx.fillStyle = '#333';
-      ctx.fillText(text2, textX2, height / 1.6);
-      ctx.save();
-   },
-};
-
 const ExpenseChartCard = () => {
+   const { isDarkMode } = useDarkMode();
    const [currentIndex, setCurrentIndex] = useState(new Date().getMonth());
    const dispatch = useDispatch();
    const addExpenseData = useSelector(
@@ -53,6 +29,32 @@ const ExpenseChartCard = () => {
    const currentMonth = months[currentIndex];
    const lastMonth = months[currentIndex - 1];
    const realCurrentMonthIndex = new Date().getMonth();
+
+   const centerTextPlugin = {
+      id: 'centerText',
+      beforeDraw: (chart) => {
+         const { width, height } = chart;
+         const ctx = chart.ctx;
+         ctx.restore();
+         const fontSize = (height / 150).toFixed(2);
+         ctx.font = `${fontSize}em sans-serif`;
+         ctx.textBaseline = 'middle';
+
+         const { text1 = 'Total', text2 = '₹0' } =
+            chart?.config?.options?.plugins?.centerText || {};
+
+         const textX1 = Math.round((width - ctx.measureText(text1).width) / 2);
+         const textX2 = Math.round((width - ctx.measureText(text2).width) / 2);
+
+         ctx.fillStyle = isDarkMode ? 'white' : '#999';
+         ctx.fillText(text1, textX1, height / 2.2);
+
+         ctx.font = `bold ${fontSize * 1.2}em sans-serif`;
+         ctx.fillStyle = isDarkMode ? 'white' : '#333';
+         ctx.fillText(text2, textX2, height / 1.6);
+         ctx.save();
+      },
+   };
 
    const handleNext = () => {
       if (currentIndex < realCurrentMonthIndex) {
@@ -139,9 +141,16 @@ const ExpenseChartCard = () => {
 
    return (
       <div className="gap-4 relative">
-         <div className="bg-white border-2 border-gray-200 p-6 rounded-2xl shadow-lg w-full relative overflow-hidden">
+         <div
+            className={`
+            ${
+               isDarkMode ? 'bg-[#222222]' : 'bg-white border-2 border-gray-200'
+            }  p-6 rounded-2xl shadow-lg w-full relative overflow-hidden`}>
             <div className="flex justify-between relative items-center mb-4">
-               <p className="text-lg font-semibold text-gray-800">
+               <p
+                  className={`text-lg font-semibold ${
+                     isDarkMode ? 'text-white' : 'text-gray-800'
+                  }`}>
                   {currentMonth} Expenses
                </p>
                {currentIndex === realCurrentMonthIndex && (
@@ -198,7 +207,9 @@ const ExpenseChartCard = () => {
                         className="flex items-center justify-center text-sm font-light rounded-2xl">
                         <div className="flex items-center">
                            <p
-                              className={`text-gray-900 py-1 rounded-2xl w-fit`}>
+                              className={`${
+                                 isDarkMode ? 'text-white' : 'text-gray-900'
+                              } py-1 rounded-2xl w-fit`}>
                               {item.name}
                            </p>
                         </div>
@@ -224,9 +235,15 @@ const ExpenseChartCard = () => {
                <MoveRight />
             </div>
          </div>
-         <div className="bg-white border-2 border-gray-200 p-6 rounded-2xl shadow-lg w-full relative overflow-hidden grid grid-cols-2 gap-4 mt-4 h-[260px]">
+         <div
+            className={`
+            ${isDarkMode ? 'bg-[#222222]' : 'bg-white border-2 border-gray-200'}
+            p-6 rounded-2xl shadow-lg w-full relative overflow-hidden grid grid-cols-2 gap-4 mt-4 h-[260px]`}>
             <div className="flex flex-col gap-2">
-               <p className="text-lg font-semibold text-gray-800">
+               <p
+                  className={`text-lg font-semibold ${
+                     isDarkMode ? 'text-white' : 'text-gray-800'
+                  }`}>
                   Saved Money
                </p>
                <div className="relative w-fit my-5 z-10 bg-white ml-2 drop-shadow-lg rounded-full">

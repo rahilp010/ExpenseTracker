@@ -24,6 +24,7 @@ import {
 import Report from '../Components/Dashboard/Report';
 import { months } from '../data';
 import Loader from '../Animations/Loader';
+import BalanceModal from '../Components/Dashboard/BalanceModal';
 
 defaults.maintainAspectRatio = false;
 defaults.responsive = true;
@@ -43,6 +44,7 @@ const Dashboard = () => {
    const totalExpense = useSelector(selectTotalExpense);
 
    const [showModal, setShowModal] = useState(false);
+   const [showBalanceModal, setShowBalanceModal] = useState(false);
    const [isEditingBalance, setIsEditingBalance] = useState(false);
    const [balanceInput, setBalanceInput] = useState(balanceByMonth || 0);
 
@@ -56,6 +58,13 @@ const Dashboard = () => {
          );
       }
    }, [dispatch, currentMonth]);
+
+   useEffect(() => {
+      const today = new Date();
+      if (today.getDate() === 1) {
+         setShowBalanceModal(true);
+      }
+   }, []);
 
    useEffect(() => {
       setBalanceInput(balanceByMonth); // keeps input in sync
@@ -73,11 +82,11 @@ const Dashboard = () => {
          ctx.textAlign = 'center';
          ctx.textBaseline = 'middle';
 
-         ctx.fillStyle = '#9CA3AF';
+         ctx.fillStyle = isDarkMode ? 'white' : '#9CA3AF';
          ctx.font = `${height * 0.07}px sans-serif`;
          ctx.fillText('Remaining', width / 2, height / 2.2);
 
-         ctx.fillStyle = '#111827';
+         ctx.fillStyle = isDarkMode ? 'white' : '#111827';
          ctx.font = `bold ${height * 0.08}px sans-serif`;
          ctx.fillText(`₹${remaining}`, width / 2, height / 1.6);
 
@@ -133,7 +142,12 @@ const Dashboard = () => {
 
    return (
       <>
-         <div className="flex transition-all duration-300 border-2 border-gray-300 rounded-2xl h-[calc(100vh-2rem)] overflow-y-hidden bg-[#f5f7fb]">
+         <div
+            className={`flex transition-all duration-300  rounded-2xl h-[calc(100vh-2rem)] overflow-y-hidden ${
+               isDarkMode
+                  ? 'bg-[#111111] text-white'
+                  : 'bg-[#f5f7fb] border-2 border-gray-300'
+            }`}>
             <SidePanel />
             <div
                className={`flex-1 p-6 overflow-y-auto min-h-screen customScrollbar`}>
@@ -159,7 +173,10 @@ const Dashboard = () => {
                </div>
 
                <div className="grid grid-cols-1 md:grid-cols-2 sm:grid-cols-1 gap-y-5 gap-x-5">
-                  <div className="border-2 border-gray-200 rounded-2xl shadow-lg relative">
+                  <div
+                     className={` rounded-2xl shadow-lg relative
+                     ${isDarkMode ? 'bg-[#222222]' : 'border-2 border-gray-200'}
+                     `}>
                      <div className="group p-5 relative mt-15">
                         {balanceByMonth !== undefined &&
                         totalExpense !== undefined ? (
@@ -210,7 +227,10 @@ const Dashboard = () => {
                                  style={{ backgroundColor: item.color }}
                                  className={`inline-block w-4 h-2 rounded-full `}
                               />
-                              <span className="text-lg font-medium text-gray-800">
+                              <span
+                                 className={`text-lg font-medium ${
+                                    isDarkMode ? 'text-white' : 'text-gray-800'
+                                 }`}>
                                  {isEditingBalance &&
                                  item.title === 'Balance' ? (
                                     <div className="flex items-center gap-2">
@@ -252,9 +272,13 @@ const Dashboard = () => {
                      ))}
 
                      <div
-                        className="bg-white mx-0 sm:mx-5 md:mx-5 lg:mx-15 rounded-2xl mb-10"
+                        className={`${
+                           isDarkMode
+                              ? 'bg-[#111111] hover:bg-white/60'
+                              : 'bg-white hover:bg-[#d4d9fb]/50'
+                        } mx-0 sm:mx-5 md:mx-5 lg:mx-15 rounded-2xl mb-10`}
                         onClick={handleModal}>
-                        <div className="p-3 flex items-center gap-2 justify-center cursor-pointer hover:bg-[#d4d9fb]/50 hover:rounded-2xl">
+                        <div className="p-3 flex items-center gap-2 justify-center cursor-pointer  hover:rounded-2xl">
                            <Plus
                               size={25}
                               className="text-[#FFC400] font-bold"
@@ -264,7 +288,10 @@ const Dashboard = () => {
                            </p>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-3 bg-[#e0e2f3] rounded-xl h-28">
+                        <div
+                           className={`grid grid-cols-3 gap-3 ${
+                              isDarkMode ? 'bg-[#1c1c1c]' : 'bg-[#e0e2f3]'
+                           } rounded-xl h-28`}>
                            {[
                               { icon: Mail, name: 'Mail' },
                               { icon: Scan, name: 'Library' },
@@ -278,7 +305,13 @@ const Dashboard = () => {
                                              size={screen.width > 768 ? 55 : 35}
                                              className="text-[#3f58f1] font-bold p-2 sm:p-2 md:p-2 lg:p-4 bg-white rounded-lg"
                                           /> */}
-                                    <Item.icon className="text-[#3f58f1] font-bold p-2 bg-white rounded-lg w-[35px] h-[35px] md:w-[55px] md:h-[55px] md:p-2 lg:p-4" />
+                                    <Item.icon
+                                       className={`text-[#3f58f1] font-bold p-2 ${
+                                          isDarkMode
+                                             ? 'bg-[#111111]'
+                                             : 'bg-white'
+                                       } rounded-lg w-[35px] h-[35px] md:w-[55px] md:h-[55px] md:p-2 lg:p-4`}
+                                    />
 
                                     <p className="text-sm font-medium text-center mt-1 text-[#3f58f1]">
                                        {Item.name}
@@ -294,6 +327,10 @@ const Dashboard = () => {
                      <ExpenseCard />
                   </div>
 
+                  {showBalanceModal && (
+                     <BalanceModal setShowBalanceModal={setShowBalanceModal} />
+                  )}
+
                   {showModal && (
                      <Model
                         setShowModal={setShowModal}
@@ -302,7 +339,14 @@ const Dashboard = () => {
                      />
                   )}
 
-                  <div className="border-2 h-screen col-span-2 border-gray-200 rounded-2xl shadow-xl">
+                  <div
+                     className={`h-screen col-span-2 rounded-2xl shadow-xl
+                        ${
+                           isDarkMode
+                              ? 'bg-[#222222]'
+                              : 'border-gray-200 border-2'
+                        }
+                     `}>
                      <Report />
                   </div>
                </div>
