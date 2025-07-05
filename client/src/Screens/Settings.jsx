@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import SidePanel from '../Components/Dashboard/SidePanel';
 import ProfileSettings from '../Components/SettingsTabs/ProfileSettings';
-import AccountSettings from '../Components/SettingsTabs/AccountSettings';
 import Display from '../Components/SettingsTabs/Display';
 import { useDarkMode } from '../Components/DarkModeContext';
 
@@ -13,21 +12,21 @@ const Settings = () => {
          title: 'Profile',
          component: <ProfileSettings />,
       },
-      {
-         id: 2,
-         title: 'Account',
-         component: <AccountSettings />,
-      },
+      // {
+      //    id: 2,
+      //    title: 'Account',
+      //    component: <AccountSettings />,
+      // },
       {
          id: 3,
          title: 'Display',
          component: <Display />,
       },
-      {
-         id: 4,
-         title: 'Notification',
-         component: <ProfileSettings />,
-      },
+      // {
+      //    id: 4,
+      //    title: 'Notification',
+      //    component: <ProfileSettings />,
+      // },
    ];
 
    const [activeTab, setActiveTab] = useState(0);
@@ -67,13 +66,19 @@ const Settings = () => {
                      <div
                         key={index}
                         onClick={() => setActiveTab(index)}
-                        className={`p-1.5 px-6 ${isDarkMode ? 'hover:bg-white/10' : 'hover:bg-gray-200'} cursor-pointer transition-all duration-200 ${
+                        className={`p-1.5 px-6 ${
+                           isDarkMode
+                              ? 'hover:bg-white/10'
+                              : 'hover:bg-gray-200'
+                        } cursor-pointer transition-all duration-200 ${
                            index === 0 ? 'rounded-l-xl' : ''
                         } ${
                            index === Tabs.length - 1 ? 'rounded-r-xl' : ''
                         } hover:border-b-3 hover:border-[#6766e8] ${
                            activeTab === index
-                              ? `text-[#6766e8] border-b-3 border-[#6766e8] ${isDarkMode ? 'bg-white/10' : 'bg-gray-200'} font-bold transition-all duration-200 `
+                              ? `text-[#6766e8] border-b-3 border-[#6766e8] ${
+                                   isDarkMode ? 'bg-white/10' : 'bg-gray-200'
+                                } font-bold transition-all duration-200 `
                               : ''
                         }`}>
                         {tab.title}

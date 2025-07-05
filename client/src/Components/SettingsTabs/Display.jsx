@@ -1,33 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import LightMode from '../../assets/LightMode.png';
-import DarkMode from '../../assets/DarkMode.png';
-import System from '../../assets/System.png';
 import { useDarkMode } from '../DarkModeContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { setTheme } from '../../app/features/settingsSlice';
+import { themes } from '../../data';
 
 const Display = () => {
    const dispatch = useDispatch();
    const theme = useSelector((state) => state.settings.theme);
    console.log('theme', theme);
-   const { isDarkMode, toggleDarkMode, setIsDarkMode } = useDarkMode();
-   const themes = [
-      {
-         id: 1,
-         name: 'light',
-         image: LightMode,
-      },
-      {
-         id: 2,
-         name: 'dark',
-         image: DarkMode,
-      },
-      {
-         id: 3,
-         name: 'system',
-         image: System,
-      },
-   ];
+   const { isDarkMode, setIsDarkMode } = useDarkMode();
 
    const [selectedTheme, setSelectedTheme] = useState(themes[0].id);
 
@@ -39,24 +20,31 @@ const Display = () => {
       if (themeId === 1) setIsDarkMode(false);
       else if (themeId === 2) setIsDarkMode(true);
       else if (themeId === 3) {
-         const prefersDark = window.matchMedia(
+         const mediaQuery = window.matchMedia(
             '(prefers-color-scheme: dark)'
          ).matches;
-         setIsDarkMode(prefersDark);
+         console.log('systemTheme', mediaQuery);
+
+         mediaQuery ? setIsDarkMode(true) : setIsDarkMode(false);
+         console.log('isDarkMode', isDarkMode);
       }
    };
 
    useEffect(() => {
-      if (selectedTheme === 3) {
-         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)').matches
-         console.log('systemTheme',mediaQuery);
-         
-        //  const handleChange = (e) => setIsDarkMode(e.matches);
-
-        //  mediaQuery.addEventListener('change', handleChange);
-        //  return () => mediaQuery.removeEventListener('change', handleChange);
+      const storedTheme = localStorage.getItem('theme');
+      if (storedTheme) {
+         setSelectedTheme(parseInt(storedTheme));
+         dispatch(setTheme(parseInt(storedTheme)));
+         if (storedTheme === '1') setIsDarkMode(false);
+         else if (storedTheme === '2') setIsDarkMode(true);
+         else if (storedTheme === '3') {
+            const mediaQuery = window.matchMedia(
+               '(prefers-color-scheme: dark)'
+            ).matches;
+            mediaQuery ? setIsDarkMode(true) : setIsDarkMode(false);
+         }
       }
-   }, [selectedTheme]);
+   }, [dispatch]);
 
    useEffect(() => {
       if (isDarkMode) {

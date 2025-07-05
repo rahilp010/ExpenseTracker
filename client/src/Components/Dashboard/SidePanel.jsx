@@ -21,16 +21,16 @@ const SidePanel = () => {
          icon: <LayoutPanelLeft size={20} strokeWidth={2} />,
          path: '/',
       },
-      {
-         name: 'Report',
-         icon: <ChartSpline size={20} strokeWidth={2} />,
-         path: '/report',
-      },
-      {
-         name: 'History',
-         icon: <ClockFading size={20} strokeWidth={2} />,
-         path: '/history',
-      },
+      // {
+      //    name: 'Report',
+      //    icon: <ChartSpline size={20} strokeWidth={2} />,
+      //    path: '/report',
+      // },
+      // // {
+      // //    name: 'History',
+      // //    icon: <ClockFading size={20} strokeWidth={2} />,
+      // //    path: '/history',
+      // // },
       {
          name: 'Profile',
          icon: <UserRoundPen size={20} strokeWidth={2} />,
@@ -56,7 +56,7 @@ const SidePanel = () => {
                      src={tracksy}
                      alt=""
                      srcSet=""
-                     className="h-14 w-full drop-shadow-2xl"
+                     className="h-12 drop-shadow-2xl"
                   />
                </div>
             ) : (

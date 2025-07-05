@@ -4,17 +4,13 @@ import Settings from './Screens/Settings.jsx';
 import notFound from './assets/404.png';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Report from './Screens/Report.jsx';
-import History from './Screens/History.jsx';
 import { useDarkMode } from './Components/DarkModeContext';
 
 const App = () => {
    const { isDarkMode } = useDarkMode();
    const paths = [
       { path: '/', element: <Dashboard /> },
-      { path: '/history', element: <History /> },
       { path: '/settings', element: <Settings /> },
-      { path: '/report', element: <Report /> },
    ];
 
    return (

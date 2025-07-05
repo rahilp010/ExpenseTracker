@@ -1,7 +1,7 @@
 import { Doughnut } from 'react-chartjs-2';
 import { EllipsisVertical, MoveLeft, MoveRight, PenLine } from 'lucide-react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import savedMoney from '../../assets/savedMoney.webp';
 import Model from './Model';
@@ -24,11 +24,15 @@ const ExpenseChartCard = () => {
    const isUpdateExpense = useSelector(
       (state) => state.expense.addExpense.isUpdateExpense
    );
+
    const [updateExpense, setUpdateExpense] = useState(false);
 
    const currentMonth = months[currentIndex];
    const lastMonth = months[currentIndex - 1];
    const realCurrentMonthIndex = new Date().getMonth();
+
+   const isDarkModeState = useSelector((state) => state.settings.isDarkMode);
+   console.log('isDarkModeState', isDarkModeState);
 
    const centerTextPlugin = {
       id: 'centerText',
@@ -46,11 +50,11 @@ const ExpenseChartCard = () => {
          const textX1 = Math.round((width - ctx.measureText(text1).width) / 2);
          const textX2 = Math.round((width - ctx.measureText(text2).width) / 2);
 
-         ctx.fillStyle = isDarkMode ? 'white' : '#999';
+         ctx.fillStyle = isDarkModeState ? 'white' : '#999';
          ctx.fillText(text1, textX1, height / 2.2);
 
          ctx.font = `bold ${fontSize * 1.2}em sans-serif`;
-         ctx.fillStyle = isDarkMode ? 'white' : '#333';
+         ctx.fillStyle = isDarkModeState ? 'white' : '#333';
          ctx.fillText(text2, textX2, height / 1.6);
          ctx.save();
       },

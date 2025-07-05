@@ -1,4 +1,7 @@
 import ProfileSettings from "./Components/SettingsTabs/ProfileSettings";
+import LightMode from './assets/LightMode.png';
+import DarkMode from './assets/DarkMode.png';
+import System from './assets/System.png';
 
 const categories = [
     { name: 'Food', color: '#EABDE6' },
@@ -12,7 +15,7 @@ const months = [
     'January',
     'February',
     'March',
-    'April',    
+    'April',
     'May',
     'June',
     'July',
@@ -54,5 +57,23 @@ const profileSettings = [
     },
 ]
 
+const themes = [
+    {
+        id: 1,
+        name: 'light',
+        image: LightMode,
+    },
+    {
+        id: 2,
+        name: 'dark',
+        image: DarkMode,
+    },
+    {
+        id: 3,
+        name: 'system',
+        image: System,
+    },
+];
 
-export { months, categories, profileSettings }
+
+export { months, categories, profileSettings, themes }
