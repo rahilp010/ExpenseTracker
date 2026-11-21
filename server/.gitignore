@@ -1,5 +1,0 @@
-src/users/userController.js
-node_modules
-.env
-
-# Ignore all files in the logs directory
